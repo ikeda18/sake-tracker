@@ -5,6 +5,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="減酒記録">
 <meta name="theme-color" content="#f2f2f7">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -283,11 +285,11 @@ function weekSummary(){
 }
 function render(){
   const s=series(); const data=metric==='g'?s.g:s.c;
-  const ds=[{data,borderColor:'#4a90e2',backgroundColor:'#4a90e2',borderWidth:2.5,pointRadius:2.5,pointHoverRadius:5,tension:.15,fill:false}];
+  const ds=[{data,borderColor:'#4a90e2',backgroundColor:'#4a90e2',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:24,tension:.15,fill:false}];
   if(metric==='g') ds.push({data:new Array(30).fill(TARGET_G),borderColor:'#c8c8cd',borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false});
   if(chart) chart.destroy();
   chart=new Chart($('chart'),{type:'line',data:{labels:s.labels,datasets:ds},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{displayColors:false,
         callbacks:{title:i=>i[0].label,label:i=>metric==='g'?i.raw+'g':i.raw+'杯'}}},
       scales:{y:{beginAtZero:true,grid:{color:'#ececef',borderDash:[4,4]},
