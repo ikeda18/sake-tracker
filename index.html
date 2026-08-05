@@ -11,9 +11,11 @@
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   :root{
-    --bg:#f2f2f7; --card:#ffffff; --ink:#1c1c1e; --sub:#8e8e93;
-    --blue:#4a90e2; --blue-press:#3a7fce; --field:#f4f4f6;
-    --chip:#eef1f5; --chip-on:#e4f0fd; --chip-on-b:#4a90e2;
+    --bg:#f5f3fb; --card:#ffffff; --ink:#47414f; --sub:#9a94a6;
+    --blue:#8577c9; --blue-press:#7568bb; --field:#efedf8;
+    --chip:#efedf8; --chip-on:#e7e5f3; --chip-on-b:#8577c9;
+    --green:#c47a45; --green-tint:#fbe3d0;
+    --accent:#d76a86; --accent-press:#c85c78;
   }
   html,body{margin:0;background:var(--bg);}
   body{
@@ -45,15 +47,15 @@
 
   .countrow{display:flex;align-items:center;gap:14px;background:var(--field);border-radius:16px;padding:12px 18px;margin-top:10px;}
   .step{width:42px;height:42px;border:none;border-radius:12px;background:#fff;font-size:24px;font-weight:600;
-    color:var(--blue);box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:pointer;line-height:0;}
+    color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:pointer;line-height:0;}
   .count{flex:1;text-align:center;font-size:40px;font-weight:800;}
   .count small{font-size:17px;font-weight:600;color:var(--sub);margin-left:3px;}
   .preview{text-align:center;color:var(--sub);font-size:15px;margin:11px 0 2px;}
   .preview b{color:#3a3a3c;font-weight:700;}
 
-  .add{width:100%;border:none;border-radius:14px;background:var(--chip-on);color:var(--blue);
+  .add{width:100%;border:none;border-radius:14px;background:var(--field);color:#7a7488;
     font-size:16px;font-weight:700;padding:13px;margin-top:12px;cursor:pointer;
-    box-shadow:inset 0 0 0 1.5px var(--chip-on-b);}
+    box-shadow:inset 0 0 0 1.5px #ddd8ee;}
 
   .items{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
   .item{display:flex;align-items:center;justify-content:space-between;background:var(--field);
@@ -63,13 +65,13 @@
   .total{text-align:center;color:var(--sub);font-size:15px;margin:16px 0 2px;}
   .total b{color:#3a3a3c;font-weight:800;font-size:17px;}
 
-  .btn{width:100%;border:none;border-radius:16px;background:var(--blue);color:#fff;font-size:19px;
+  .btn{width:100%;border:none;border-radius:16px;background:var(--accent);color:#fff;font-size:19px;
     font-weight:700;padding:17px;margin-top:14px;cursor:pointer;}
-  .btn:active{background:var(--blue-press);}
+  .btn:active{background:var(--accent-press);}
   .btn.ghost{background:transparent;color:var(--sub);font-size:15px;font-weight:600;padding:12px;margin-top:4px;}
 
   .disc{margin-top:12px;border-top:1px solid #f0f0f2;padding-top:4px;}
-  .disc summary{list-style:none;cursor:pointer;color:var(--blue);font-size:15px;font-weight:600;padding:8px 2px;}
+  .disc summary{list-style:none;cursor:pointer;color:var(--accent);font-size:15px;font-weight:600;padding:8px 2px;}
   .disc summary::-webkit-details-marker{display:none;}
   .trigseg{display:flex;flex-wrap:wrap;gap:8px;}
   .trigseg button{border:none;background:var(--chip);color:#3a3a3c;font-size:13.5px;font-weight:600;
@@ -86,7 +88,16 @@
   .chartwrap{position:relative;height:250px;margin-top:6px;}
   .wk{text-align:center;color:var(--sub);font-size:14px;margin-top:14px;line-height:1.5;}
   .wk b{color:#3a3a3c;}
-  .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
+.btn.rest{background:var(--green-tint);color:var(--green);font-weight:700;
+    box-shadow:inset 0 0 0 1.5px var(--green);margin-top:4px;}
+  .rest-sep{border-top:1px solid #edeef0;margin:16px 0 4px;}
+  .memo{padding:11px 2px;border-bottom:1px solid #f0f0f2;}
+  .memo:last-child{border-bottom:none;}
+  .memo-date{font-size:14px;font-weight:700;color:#3c4043;margin-right:8px;}
+  .memo-trg{font-size:12px;font-weight:600;color:var(--accent);}
+  .memo-note{font-size:13px;color:#5f6368;margin-top:4px;line-height:1.5;}
+  .memo-empty{font-size:14px;color:#9aa0a6;padding:8px 2px;line-height:1.5;}
+    .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
     background:#1c1c1e;color:#fff;padding:12px 22px;border-radius:14px;font-size:15px;font-weight:600;
     opacity:0;transition:.25s;pointer-events:none;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -129,7 +140,8 @@
     <textarea id="note" rows="3" placeholder="気づき・改善策（例：ストレスの日は飲みたくなる／今日はビールで通せた）"></textarea>
   </details>
 
-  <button class="btn ghost" onclick="saveZero()">この日は飲んでいない（0で記録）</button>
+  <div class="rest-sep"></div>
+  <button class="btn rest" onclick="saveZero()">🎉 この日は飲んでいない（休肝で記録）</button>
 </div>
 
 <div class="card">
@@ -140,6 +152,14 @@
   </div>
   <div class="chartwrap"><canvas id="chart"></canvas></div>
   <div class="wk" id="week"></div>
+</div>
+
+<div class="card">
+  <h2>ふりかえり</h2>
+  <details class="disc">
+    <summary>メモ・きっかけを見る</summary>
+    <div id="memolist" style="margin-top:6px"></div>
+  </details>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -266,7 +286,7 @@ async function save(){
 }
 async function saveZero(){
   entries[selDate]={items:[],grams:0,count:0,triggers:selectedTriggers(),note:$('note').value.trim()};
-  persist(selDate); setDate(selDate); render(); toast('0で記録しました');
+  persist(selDate); setDate(selDate); render(); toast('🎉 休肝日、ナイス！');
 }
 
 // ---- chart ----
@@ -285,8 +305,7 @@ function weekSummary(){
 }
 function render(){
   const s=series(); const data=metric==='g'?s.g:s.c;
-  const ds=[{data,borderColor:'#4a90e2',backgroundColor:'#4a90e2',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:24,tension:.15,fill:false}];
-  if(metric==='g') ds.push({data:new Array(30).fill(TARGET_G),borderColor:'#c8c8cd',borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false});
+  const ds=[{data,borderColor:'#d76a86',backgroundColor:'#d76a86',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:24,tension:.15,fill:false}];
   if(chart) chart.destroy();
   chart=new Chart($('chart'),{type:'line',data:{labels:s.labels,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
@@ -296,6 +315,24 @@ function render(){
           ticks:{color:'#b5b5ba',font:{size:12},callback:v=>metric==='g'?v+'g':v}},
         x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit:6,autoSkip:true}}}}});
   weekSummary();
+  renderMemos();
+}
+function escapeHtml(s){ return String(s).replace(/[&<>\"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]; }); }
+function renderMemos(){
+  const box=$('memolist'); if(!box) return;
+  const keys=Object.keys(entries).filter(function(k){ const e=entries[k];
+    return e && (((e.triggers||[]).length) || (e.note && e.note.trim())); }).sort().reverse();
+  if(!keys.length){ box.innerHTML='<div class="memo-empty">まだメモはありません。「詳細を残す」から書けます。</div>'; return; }
+  box.innerHTML='';
+  keys.forEach(function(k){
+    const e=entries[k]; const d=keyToDate(k);
+    const trg=(e.triggers||[]).join('・'); const note=(e.note||'').trim();
+    const row=document.createElement('div'); row.className='memo';
+    let html='<span class="memo-date">'+(d.getMonth()+1)+'/'+d.getDate()+'('+WD[d.getDay()]+')</span>';
+    if(trg) html+='<span class="memo-trg">'+escapeHtml(trg)+'</span>';
+    if(note) html+='<div class="memo-note">'+escapeHtml(note)+'</div>';
+    row.innerHTML=html; box.appendChild(row);
+  });
 }
 function setMetric(m){ metric=m; $('tg-g').className=m==='g'?'on':''; $('tg-c').className=m==='count'?'on':''; render(); }
 
