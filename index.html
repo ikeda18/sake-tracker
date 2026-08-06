@@ -16,6 +16,7 @@
     --chip:#efedf8; --chip-on:#e7e5f3; --chip-on-b:#8577c9;
     --green:#c47a45; --green-tint:#fbe3d0;
     --accent:#d76a86; --accent-press:#c85c78;
+    --drink:#d76a86; --weight:#4f9fd0; --weight-press:#428fc0; --weight-tint:#dcecf9;
   }
   html,body{margin:0;background:var(--bg);}
   body{
@@ -97,6 +98,20 @@
   .memo-trg{font-size:12px;font-weight:600;color:var(--accent);}
   .memo-note{font-size:13px;color:#5f6368;margin-top:4px;line-height:1.5;}
   .memo-empty{font-size:14px;color:#9aa0a6;padding:8px 2px;line-height:1.5;}
+  .viewtoggle{display:flex;gap:6px;background:var(--chip);border-radius:14px;padding:5px;margin:0 2px 18px;}
+  .viewtoggle button{flex:1;border:none;background:transparent;color:var(--sub);font-size:16px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;}
+  .viewtoggle button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .winput-row{display:flex;align-items:baseline;justify-content:center;gap:8px;background:var(--field);border-radius:16px;padding:20px 18px;}
+  .winput-row input{width:190px;border:none;background:transparent;text-align:center;font-size:48px;font-weight:800;color:var(--ink);font-family:inherit;}
+  .winput-row input::placeholder{color:#c9c4d6;}
+  .wunit{font-size:20px;font-weight:700;color:var(--sub);}
+  .goalinput{width:66px;border:none;background:var(--field);border-radius:8px;padding:5px 8px;text-align:center;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);}
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+  #screen-weight .btn{background:var(--weight);}
+  #screen-weight .btn:active{background:var(--weight-press);}
+  #screen-weight .winput-row{background:var(--weight-tint);}
+  #v-drink.on{color:var(--drink);}
+  #v-weight.on{color:var(--weight);}
     .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
     background:#1c1c1e;color:#fff;padding:12px 22px;border-radius:14px;font-size:15px;font-weight:600;
     opacity:0;transition:.25s;pointer-events:none;}
@@ -105,6 +120,12 @@
 
 <h1>減酒記録</h1>
 
+<div class="viewtoggle">
+  <button id="v-drink" class="on" onclick="setView('drink')">お酒</button>
+  <button id="v-weight" onclick="setView('weight')">体重</button>
+</div>
+
+<div id="screen-drink">
 <div class="card">
   <h2>お酒を記録</h2>
 
@@ -161,6 +182,23 @@
     <div id="memolist" style="margin-top:6px"></div>
   </details>
 </div>
+</div>
+
+<div id="screen-weight" style="display:none">
+<div class="card">
+  <h2>今日の体重</h2>
+  <div class="winput-row">
+    <input id="wInput" type="number" inputmode="decimal" step="0.1" placeholder="65.0">
+    <span class="wunit">kg</span>
+  </div>
+  <button class="btn" onclick="saveWeight()">記録する</button>
+</div>
+<div class="card">
+  <h2>直近30日間</h2>
+  <div class="chartwrap"><canvas id="wchart"></canvas></div>
+  <div class="wk" id="wgoalrow">目標 <input id="wGoal" class="goalinput" type="number" inputmode="decimal" step="0.1" placeholder="—" onchange="setGoal(this.value)"> kg</div>
+</div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -182,6 +220,7 @@ const WD = ['日','月','火','水','木','金','土'];
 let type = Object.keys(DRINKS)[0], count = 1, metric = 'g', chart = null;
 let selDate = null, items = [];
 let entries = {};
+let view='drink', weightChart=null, goal=null;
 
 const $ = id => document.getElementById(id);
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -218,7 +257,7 @@ async function syncRemote(){ // 起動時：シートから最新を取得
   try{
     const r = await fetch(API);
     const data = await r.json();
-    if(data && typeof data==='object'){ entries=data; saveCache(); setDate(selDate); render(); }
+    if(data && typeof data==='object'){ entries=data; saveCache(); setDate(selDate); render(); renderWeight(); if(view==='weight') prefillWeight(); }
   }catch(e){ /* オフライン時はキャッシュのまま */ }
 }
 
@@ -281,11 +320,15 @@ async function save(){
   if(!list.length && count>0) list=[{type,count,grams:count*DRINKS[type]}]; // 1種類だけなら追加不要
   if(!list.length) return saveZero();
   const g=list.reduce((a,b)=>a+b.grams,0), c=list.reduce((a,b)=>a+b.count,0);
+  const pw=entries[selDate]&&entries[selDate].weight;
   entries[selDate]={items:list,grams:g,count:c,triggers:selectedTriggers(),note:$('note').value.trim()};
+  if(pw!=null) entries[selDate].weight=pw;
   persist(selDate); setDate(selDate); render(); toast('記録しました');
 }
 async function saveZero(){
+  const pw=entries[selDate]&&entries[selDate].weight;
   entries[selDate]={items:[],grams:0,count:0,triggers:selectedTriggers(),note:$('note').value.trim()};
+  if(pw!=null) entries[selDate].weight=pw;
   persist(selDate); setDate(selDate); render(); toast('🎉 休肝日、ナイス！');
 }
 
@@ -310,7 +353,7 @@ function render(){
   chart=new Chart($('chart'),{type:'line',data:{labels:s.labels,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{displayColors:false,
-        callbacks:{title:i=>i[0].label,label:i=>metric==='g'?i.raw+'g':i.raw+'杯'}}},
+        callbacks:{title:function(i){return (i&&i.length)?i[0].label:'';},label:i=>metric==='g'?i.raw+'g':i.raw+'杯'}}},
       scales:{y:{beginAtZero:true,grid:{color:'#ececef',borderDash:[4,4]},
           ticks:{color:'#b5b5ba',font:{size:12},callback:v=>metric==='g'?v+'g':v}},
         x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit:6,autoSkip:true}}}}});
@@ -336,6 +379,60 @@ function renderMemos(){
 }
 function setMetric(m){ metric=m; $('tg-g').className=m==='g'?'on':''; $('tg-c').className=m==='count'?'on':''; render(); }
 
+const GKEY='sake_goal_v1';
+function setView(v){
+  view=v;
+  $('v-drink').className=v==='drink'?'on':'';
+  $('v-weight').className=v==='weight'?'on':'';
+  $('screen-drink').style.display=v==='drink'?'':'none';
+  $('screen-weight').style.display=v==='weight'?'':'none';
+  if(v==='weight'){ prefillWeight(); renderWeight(); } else { render(); }
+}
+function prefillWeight(){
+  const e=entries[ymd(new Date())];
+  $('wInput').value=(e&&e.weight!=null&&e.weight!=='')?e.weight:'';
+}
+function saveWeight(){
+  const v=parseFloat($('wInput').value);
+  if(isNaN(v)||v<=0){ toast('体重を入力してね'); return; }
+  const today=ymd(new Date());
+  if(!entries[today]) entries[today]={grams:0,count:0,items:[],triggers:[],note:''};
+  entries[today].weight=v;
+  saveCache(); pushWeight(today); renderWeight(); toast('体重を記録しました');
+}
+function pushWeight(date){
+  if(!API_SET) return;
+  const w=(entries[date]&&entries[date].weight!=null)?entries[date].weight:'';
+  try{ fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'saveWeight',date:date,weight:w})}); }
+  catch(err){ toast('体重の同期に失敗'); }
+}
+function setGoal(v){
+  const n=parseFloat(v); goal=isNaN(n)?null:n;
+  try{ localStorage.setItem(GKEY, goal==null?'':String(goal)); }catch(e){}
+  renderWeight();
+}
+function loadGoal(){
+  try{ const g=localStorage.getItem(GKEY); if(g){ goal=parseFloat(g); if($('wGoal')) $('wGoal').value=goal; } }catch(e){}
+}
+function renderWeight(){
+  const cv=$('wchart'); if(!cv) return;
+  const labels=[], data=[]; const t=new Date();
+  for(let i=29;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i);
+    labels.push((d.getMonth()+1)+'/'+d.getDate());
+    const e=entries[ymd(d)];
+    data.push((e&&e.weight!=null&&e.weight!=='')?e.weight:null);
+  }
+  const ds=[{data,borderColor:'#4f9fd0',backgroundColor:'#4f9fd0',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:24,tension:.15,fill:false,spanGaps:true}];
+  if(goal!=null) ds.push({data:new Array(30).fill(goal),borderColor:'#cfd2cb',borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false,spanGaps:true});
+  if(weightChart) weightChart.destroy();
+  weightChart=new Chart(cv,{type:'line',data:{labels,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{displayColors:false,filter:function(it){return it.datasetIndex===0 && it.raw!=null;},callbacks:{title:function(i){return (i&&i.length)?i[0].label:'';},label:i=>i.raw+'kg'}}},
+      scales:{y:{beginAtZero:false,grid:{color:'#ececef',borderDash:[4,4]},ticks:{color:'#b5b5ba',font:{size:12},callback:v=>v+'kg'}},
+        x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit:6,autoSkip:true}}}}});
+}
+
 let toastT;
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1600); }
@@ -343,8 +440,8 @@ function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('sho
 async function init(){
   buildSel(); buildTrig(); updatePreview();
   $('datepick').max=ymd(new Date());
-  load(); pickToday(); render();   // まずキャッシュで即表示
-  await syncRemote();              // シートから最新を取得して上書き
+  load(); loadGoal(); pickToday(); render(); renderWeight();  // まずキャッシュで即表示
+  await syncRemote();                                         // シートから最新を取得して上書き
 }
 if(window.Chart){ init(); } else { window.addEventListener('load', init); }
 </script>
