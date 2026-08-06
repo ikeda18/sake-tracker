@@ -186,7 +186,12 @@
 
 <div id="screen-weight" style="display:none">
 <div class="card">
-  <h2>今日の体重</h2>
+  <h2>体重</h2>
+  <div class="dates">
+    <button id="wd-today" class="on" onclick="pickWToday()">今日</button>
+    <button id="wd-yest" onclick="pickWYest()">昨日</button>
+  </div>
+  <div class="datelabel" id="wdatelabel"></div>
   <div class="winput-row">
     <input id="wInput" type="number" inputmode="decimal" step="0.1" placeholder="65.0">
     <span class="wunit">kg</span>
@@ -220,7 +225,7 @@ const WD = ['日','月','火','水','木','金','土'];
 let type = Object.keys(DRINKS)[0], count = 1, metric = 'g', chart = null;
 let selDate = null, items = [];
 let entries = {};
-let view='drink', weightChart=null, goal=null;
+let view='drink', weightChart=null, goal=null, wDate=null;
 
 const $ = id => document.getElementById(id);
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -386,19 +391,30 @@ function setView(v){
   $('v-weight').className=v==='weight'?'on':'';
   $('screen-drink').style.display=v==='drink'?'':'none';
   $('screen-weight').style.display=v==='weight'?'':'none';
-  if(v==='weight'){ prefillWeight(); renderWeight(); } else { render(); }
+  if(v==='weight'){ if(!wDate) wDate=ymd(new Date()); setWDate(wDate); renderWeight(); } else { render(); }
 }
 function prefillWeight(){
-  const e=entries[ymd(new Date())];
+  const e=entries[wDate||ymd(new Date())];
   $('wInput').value=(e&&e.weight!=null&&e.weight!=='')?e.weight:'';
 }
+function setWDate(key){
+  wDate=key;
+  const tk=ymd(new Date()), yd=new Date(); yd.setDate(yd.getDate()-1); const yk=ymd(yd);
+  $('wd-today').className=key===tk?'on':'';
+  $('wd-yest').className=key===yk?'on':'';
+  const d=keyToDate(key);
+  if($('wdatelabel')) $('wdatelabel').textContent=(d.getMonth()+1)+'/'+d.getDate()+'('+WD[d.getDay()]+') の体重';
+  prefillWeight();
+}
+function pickWToday(){ setWDate(ymd(new Date())); }
+function pickWYest(){ const d=new Date(); d.setDate(d.getDate()-1); setWDate(ymd(d)); }
 function saveWeight(){
+  const day=wDate||ymd(new Date());
   const v=parseFloat($('wInput').value);
   if(isNaN(v)||v<=0){ toast('体重を入力してね'); return; }
-  const today=ymd(new Date());
-  if(!entries[today]) entries[today]={grams:0,count:0,items:[],triggers:[],note:''};
-  entries[today].weight=v;
-  saveCache(); pushWeight(today); renderWeight(); toast('体重を記録しました');
+  if(!entries[day]) entries[day]={grams:0,count:0,items:[],triggers:[],note:''};
+  entries[day].weight=v;
+  saveCache(); pushWeight(day); renderWeight(); toast('体重を記録しました');
 }
 function pushWeight(date){
   if(!API_SET) return;
@@ -413,7 +429,9 @@ function setGoal(v){
   renderWeight();
 }
 function loadGoal(){
-  try{ const g=localStorage.getItem(GKEY); if(g){ goal=parseFloat(g); if($('wGoal')) $('wGoal').value=goal; } }catch(e){}
+  let g=null; try{ g=localStorage.getItem(GKEY); }catch(e){}
+  goal=(g!==null && g!=='')?parseFloat(g):65;
+  if($('wGoal')) $('wGoal').value=goal;
 }
 function renderWeight(){
   const cv=$('wchart'); if(!cv) return;
