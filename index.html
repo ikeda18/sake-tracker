@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
 <meta charset="utf-8">
 <title>減酒記録</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -29,7 +32,6 @@
   .card h2{font-size:20px;font-weight:700;margin:0 0 16px;}
   label.lbl{display:block;font-size:15px;color:var(--sub);font-weight:500;margin:16px 2px 9px;}
   label.lbl:first-of-type{margin-top:0;}
-
   .dates{display:flex;gap:8px;align-items:center;}
   .dates button{border:none;background:var(--chip);color:#3a3a3c;font-size:15px;font-weight:600;
     padding:9px 16px;border-radius:12px;cursor:pointer;}
@@ -39,13 +41,11 @@
     font-family:inherit;font-size:15px;color:#3a3a3c;}
   input[type=date].on{background:var(--blue);color:#fff;}
   input[type=date].on::-webkit-calendar-picker-indicator{filter:invert(1) brightness(2.2);}
-
   select{width:100%;border:none;background:var(--field);border-radius:14px;padding:15px 44px 15px 16px;
     font-family:inherit;font-size:16px;font-weight:600;color:var(--ink);cursor:pointer;
     appearance:none;-webkit-appearance:none;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat:no-repeat;background-position:right 16px center;}
-
   .countrow{display:flex;align-items:center;gap:14px;background:var(--field);border-radius:16px;padding:12px 18px;margin-top:10px;}
   .step{width:42px;height:42px;border:none;border-radius:12px;background:#fff;font-size:24px;font-weight:600;
     color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:pointer;line-height:0;}
@@ -53,11 +53,9 @@
   .count small{font-size:17px;font-weight:600;color:var(--sub);margin-left:3px;}
   .preview{text-align:center;color:var(--sub);font-size:15px;margin:11px 0 2px;}
   .preview b{color:#3a3a3c;font-weight:700;}
-
   .add{width:100%;border:none;border-radius:14px;background:var(--field);color:#7a7488;
     font-size:16px;font-weight:700;padding:13px;margin-top:12px;cursor:pointer;
     box-shadow:inset 0 0 0 1.5px #ddd8ee;}
-
   .items{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
   .item{display:flex;align-items:center;justify-content:space-between;background:var(--field);
     border-radius:12px;padding:11px 15px;font-size:15px;font-weight:600;}
@@ -65,12 +63,10 @@
   .item .rm{border:none;background:none;color:#c0392b;font-size:20px;cursor:pointer;padding:0 4px;line-height:1;}
   .total{text-align:center;color:var(--sub);font-size:15px;margin:16px 0 2px;}
   .total b{color:#3a3a3c;font-weight:800;font-size:17px;}
-
   .btn{width:100%;border:none;border-radius:16px;background:var(--accent);color:#fff;font-size:19px;
     font-weight:700;padding:17px;margin-top:14px;cursor:pointer;}
   .btn:active{background:var(--accent-press);}
   .btn.ghost{background:transparent;color:var(--sub);font-size:15px;font-weight:600;padding:12px;margin-top:4px;}
-
   .disc{margin-top:12px;border-top:1px solid #f0f0f2;padding-top:4px;}
   .disc summary{list-style:none;cursor:pointer;color:var(--accent);font-size:15px;font-weight:600;padding:8px 2px;}
   .disc summary::-webkit-details-marker{display:none;}
@@ -81,13 +77,16 @@
   textarea{width:100%;border:none;background:var(--field);border-radius:12px;padding:12px;
     font-size:15px;font-family:inherit;resize:none;margin-top:8px;color:var(--ink);}
   textarea::placeholder{color:#b5b5ba;}
-
-  .toolbar{display:flex;gap:8px;margin-bottom:6px;}
+  .toolbar{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
   .toolbar button{border:none;background:var(--chip);color:#3a3a3c;font-size:13px;font-weight:700;
     padding:7px 14px;border-radius:10px;cursor:pointer;}
   .toolbar button.on{background:var(--blue);color:#fff;}
+  .rangebar{display:flex;gap:8px;margin:0 0 12px;}
+  .rangebar button{border:none;background:var(--chip);color:#3a3a3c;font-size:13px;font-weight:700;
+    padding:7px 16px;border-radius:10px;cursor:pointer;}
+  .rangebar button.on{background:var(--accent);color:#fff;}
   .chartwrap{position:relative;height:250px;margin-top:6px;}
-  .wk{text-align:center;color:var(--sub);font-size:14px;margin-top:14px;line-height:1.5;}
+  .wk{text-align:center;color:var(--sub);font-size:14px;margin-top:14px;line-height:1.6;}
   .wk b{color:#3a3a3c;}
 .btn.rest{background:var(--green-tint);color:var(--green);font-weight:700;
     box-shadow:inset 0 0 0 1.5px var(--green);margin-top:4px;}
@@ -117,28 +116,24 @@
     opacity:0;transition:.25s;pointer-events:none;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
-
+</head>
+<body>
 <h1>減酒記録</h1>
-
 <div class="viewtoggle">
   <button id="v-drink" class="on" onclick="setView('drink')">お酒</button>
   <button id="v-weight" onclick="setView('weight')">体重</button>
 </div>
-
 <div id="screen-drink">
 <div class="card">
   <h2>お酒を記録</h2>
-
   <div class="dates">
     <button id="d-today" onclick="pickToday()">今日</button>
     <button id="d-yest" onclick="pickYest()">昨日</button>
     <input type="date" id="datepick" onchange="pickDate(this.value)">
   </div>
   <div class="datelabel" id="datelabel"></div>
-
   <label class="lbl">飲んだお酒</label>
   <select id="sel" onchange="onType(this.value)"></select>
-
   <label class="lbl">杯数</label>
   <div class="countrow">
     <button class="step" onclick="bump(-1)">−</button>
@@ -146,27 +141,25 @@
     <button class="step" onclick="bump(1)">＋</button>
   </div>
   <div class="preview">純アルコール <b id="preview">約17g</b></div>
-
   <button class="add" onclick="addItem()">＋ 別のお酒も飲んだら追加</button>
-
   <div class="items" id="items"></div>
   <div class="total" id="totalline"></div>
-
   <button class="btn" onclick="save()">記録する</button>
-
   <details class="disc">
     <summary>詳細を残す（任意）</summary>
     <label class="lbl">飲みたくなったきっかけ</label>
     <div class="trigseg" id="trigseg"></div>
     <textarea id="note" rows="3" placeholder="気づき・改善策（例：ストレスの日は飲みたくなる／今日はビールで通せた）"></textarea>
   </details>
-
   <div class="rest-sep"></div>
   <button class="btn rest" onclick="saveZero()">🎉 この日は飲んでいない</button>
 </div>
-
 <div class="card">
-  <h2>直近30日間</h2>
+  <h2 id="chart-title">直近30日間</h2>
+  <div class="rangebar">
+    <button id="rg-30" class="on" onclick="setRange(30)">30日</button>
+    <button id="rg-90" onclick="setRange(90)">90日</button>
+  </div>
   <div class="toolbar">
     <button id="tg-g" class="on" onclick="setMetric('g')">純アルコール(g)</button>
     <button id="tg-c" onclick="setMetric('count')">杯数</button>
@@ -174,7 +167,6 @@
   <div class="chartwrap"><canvas id="chart"></canvas></div>
   <div class="wk" id="week"></div>
 </div>
-
 <div class="card">
   <h2>ふりかえり</h2>
   <details class="disc">
@@ -183,7 +175,6 @@
   </details>
 </div>
 </div>
-
 <div id="screen-weight" style="display:none">
 <div class="card">
   <h2>体重</h2>
@@ -199,14 +190,16 @@
   <button class="btn" onclick="saveWeight()">記録する</button>
 </div>
 <div class="card">
-  <h2>直近30日間</h2>
+  <h2 id="wchart-title">直近30日間</h2>
+  <div class="rangebar">
+    <button id="wrg-30" class="on" onclick="setWRange(30)">30日</button>
+    <button id="wrg-90" onclick="setWRange(90)">90日</button>
+  </div>
   <div class="chartwrap"><canvas id="wchart"></canvas></div>
   <div class="wk" id="wgoalrow">目標 <input id="wGoal" class="goalinput" type="number" inputmode="decimal" step="0.1" placeholder="—" onchange="setGoal(this.value)"> kg</div>
 </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
 const DRINKS = {
   '【ビール】中ジョッキ（約435ml）':17,
@@ -221,29 +214,24 @@ const DRINKS = {
 const TRIGGERS = ['仕事終わり','友人と飲み','ストレス','料理中','なんとなく','その他'];
 const TARGET_G = 20;
 const WD = ['日','月','火','水','木','金','土'];
-
 let type = Object.keys(DRINKS)[0], count = 1, metric = 'g', chart = null;
 let selDate = null, items = [];
 let entries = {};
 let view='drink', weightChart=null, goal=null, wDate=null;
-
+let range = 30, wRange = 30;
 const $ = id => document.getElementById(id);
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const keyToDate = k => { const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d); };
-
 // ▼▼ ここにGASのウェブアプリURL(.../exec)を貼る ▼▼
 const API = 'https://script.google.com/macros/s/AKfycbzDTMc6QptmQE20Nb2oH8ZxBuSAe2r_chn9_0sO-rG-vLFGxiIcWEj-HBSHT-wnVrZ8UA/exec';
 // ▲▲ 貼るまではこの端末内(localStorage)だけで動く ▲▲
 const API_SET = API.startsWith('https://');
 const CACHE = 'sake_cache_v1';
-
 function load(){ // 端末内キャッシュ（起動を速く・オフラインでも読める）
   try{ const raw=localStorage.getItem(CACHE); if(raw) entries=JSON.parse(raw); }catch(e){}
 }
 function saveCache(){ try{ localStorage.setItem(CACHE, JSON.stringify(entries)); }catch(e){} }
-
 function persist(date){ saveCache(); pushRemote(date); } // 保存時：キャッシュ＋シートへ
-
 async function pushRemote(date){
   if(!API_SET) return;
   const e = entries[date] || {grams:0,count:0,items:[],triggers:[],note:''};
@@ -256,7 +244,6 @@ async function pushRemote(date){
     });
   }catch(err){ toast('シート同期に失敗（通信環境を確認）'); }
 }
-
 async function syncRemote(){ // 起動時：シートから最新を取得
   if(!API_SET) return;
   try{
@@ -265,7 +252,6 @@ async function syncRemote(){ // 起動時：シートから最新を取得
     if(data && typeof data==='object'){ entries=data; saveCache(); setDate(selDate); render(); renderWeight(); if(view==='weight') prefillWeight(); }
   }catch(e){ /* オフライン時はキャッシュのまま */ }
 }
-
 // ---- date ----
 function setDate(key){
   selDate=key;
@@ -286,7 +272,6 @@ function setDate(key){
 function pickToday(){ setDate(ymd(new Date())); }
 function pickYest(){ const d=new Date(); d.setDate(d.getDate()-1); setDate(ymd(d)); }
 function pickDate(v){ if(v) setDate(v); }
-
 // ---- input ----
 function buildSel(){
   const s=$('sel'); s.innerHTML='';
@@ -303,7 +288,6 @@ function buildTrig(){
 function onType(v){ type=v; updatePreview(); }
 function bump(n){ count=Math.max(1,count+n); $('count').textContent=count; updatePreview(); }
 function updatePreview(){ $('preview').textContent='約'+(count*DRINKS[type])+'g'; }
-
 function addItem(){ items.push({type,count,grams:count*DRINKS[type]}); count=1; $('count').textContent=1; updatePreview(); renderItems(); }
 function removeItem(i){ items.splice(i,1); renderItems(); }
 function renderItems(){
@@ -317,7 +301,6 @@ function renderItems(){
   const g=items.reduce((a,b)=>a+b.grams,0), c=items.reduce((a,b)=>a+b.count,0);
   $('totalline').innerHTML = `この日の合計：<b>${g}g</b>（${c}杯）`;
 }
-
 // ---- save ----
 function selectedTriggers(){ return [...document.querySelectorAll('#trigseg button.on')].map(b=>b.dataset.t); }
 async function save(){
@@ -336,24 +319,44 @@ async function saveZero(){
   if(pw!=null) entries[selDate].weight=pw;
   persist(selDate); setDate(selDate); render(); toast('🎉 休肝日、ナイス！');
 }
-
 // ---- chart ----
-function series(){
+function series(n){
   const labels=[],g=[],c=[]; const t=new Date();
-  for(let i=29;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i);
+  for(let i=n-1;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i);
     labels.push(`${d.getMonth()+1}/${d.getDate()}`);
     const e=entries[ymd(d)]; g.push(e?e.grams:0); c.push(e?e.count:0); }
   return {labels,g,c};
 }
-function weekSummary(){
+function periodSummary(n){
   const t=new Date(); let days=0,g=0;
-  for(let i=0;i<7;i++){ const d=new Date(t); d.setDate(t.getDate()-i);
+  for(let i=0;i<n;i++){ const d=new Date(t); d.setDate(t.getDate()-i);
     const e=entries[ymd(d)]; if(e&&e.grams>0){ days++; g+=e.grams; } }
-  $('week').innerHTML=`今週：飲んだ日 <b>${days}日</b> ／ 純アルコール合計 <b>${g}g</b>`;
+  return {days,g};
+}
+function setRange(n){
+  range=n;
+  $('rg-30').className=n===30?'on':'';
+  $('rg-90').className=n===90?'on':'';
+  $('chart-title').textContent=`直近${n}日間`;
+  render();
 }
 function render(){
-  const s=series(); const data=metric==='g'?s.g:s.c;
-  const ds=[{data,borderColor:'#d76a86',backgroundColor:'#d76a86',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:24,tension:.15,fill:false}];
+  const s=series(range); const data=metric==='g'?s.g:s.c;
+  const wide = range>=90;
+  // 90日は点を消してエリア塗り、30日は点あり・塗りなし
+  const ctx=$('chart').getContext('2d');
+  const grad=ctx.createLinearGradient(0,0,0,250);
+  grad.addColorStop(0,'rgba(215,106,134,0.28)');
+  grad.addColorStop(1,'rgba(215,106,134,0.02)');
+  const ds=[{data,
+    borderColor:'#d76a86',
+    backgroundColor: wide?grad:'#d76a86',
+    borderWidth: wide?2:2.5,
+    pointRadius: wide?0:3,
+    pointHoverRadius: wide?4:6,
+    pointHitRadius:24,
+    tension:.25,
+    fill: wide?true:false}];
   if(chart) chart.destroy();
   chart=new Chart($('chart'),{type:'line',data:{labels:s.labels,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
@@ -361,8 +364,11 @@ function render(){
         callbacks:{title:function(i){return (i&&i.length)?i[0].label:'';},label:i=>metric==='g'?i.raw+'g':i.raw+'杯'}}},
       scales:{y:{beginAtZero:true,grid:{color:'#ececef',borderDash:[4,4]},
           ticks:{color:'#b5b5ba',font:{size:12},callback:v=>metric==='g'?v+'g':v}},
-        x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit:6,autoSkip:true}}}}});
-  weekSummary();
+        x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit: wide?6:6,autoSkip:true}}}}});
+  const wk=periodSummary(7);
+  const pr=periodSummary(range);
+  $('week').innerHTML=`今週：飲んだ日 <b>${wk.days}日</b> ／ 純アルコール合計 <b>${wk.g}g</b><br>`+
+    `直近${range}日：飲んだ日 <b>${pr.days}日</b> ／ 合計 <b>${pr.g}g</b>`;
   renderMemos();
 }
 function escapeHtml(s){ return String(s).replace(/[&<>\"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]; }); }
@@ -383,7 +389,6 @@ function renderMemos(){
   });
 }
 function setMetric(m){ metric=m; $('tg-g').className=m==='g'?'on':''; $('tg-c').className=m==='count'?'on':''; render(); }
-
 const GKEY='sake_goal_v1';
 function setView(v){
   view=v;
@@ -433,16 +438,36 @@ function loadGoal(){
   goal=(g!==null && g!=='')?parseFloat(g):65;
   if($('wGoal')) $('wGoal').value=goal;
 }
+function setWRange(n){
+  wRange=n;
+  $('wrg-30').className=n===30?'on':'';
+  $('wrg-90').className=n===90?'on':'';
+  $('wchart-title').textContent=`直近${n}日間`;
+  renderWeight();
+}
 function renderWeight(){
   const cv=$('wchart'); if(!cv) return;
+  const n=wRange;
   const labels=[], data=[]; const t=new Date();
-  for(let i=29;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i);
+  for(let i=n-1;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i);
     labels.push((d.getMonth()+1)+'/'+d.getDate());
     const e=entries[ymd(d)];
     data.push((e&&e.weight!=null&&e.weight!=='')?e.weight:null);
   }
-  const ds=[{data,borderColor:'#4f9fd0',backgroundColor:'#4f9fd0',borderWidth:2.5,pointRadius:3,pointHoverRadius:6,pointHitRadius:24,tension:.15,fill:false,spanGaps:true}];
-  if(goal!=null) ds.push({data:new Array(30).fill(goal),borderColor:'#cfd2cb',borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false,spanGaps:true});
+  const wide = n>=90;
+  const ctx=cv.getContext('2d');
+  const grad=ctx.createLinearGradient(0,0,0,250);
+  grad.addColorStop(0,'rgba(79,159,208,0.28)');
+  grad.addColorStop(1,'rgba(79,159,208,0.02)');
+  const ds=[{data,
+    borderColor:'#4f9fd0',
+    backgroundColor: wide?grad:'#4f9fd0',
+    borderWidth: wide?2:2.5,
+    pointRadius: wide?0:3,
+    pointHoverRadius: wide?4:6,
+    pointHitRadius:24,
+    tension:.25,fill: wide?true:false,spanGaps:true}];
+  if(goal!=null) ds.push({data:new Array(n).fill(goal),borderColor:'#cfd2cb',borderWidth:1.5,borderDash:[5,5],pointRadius:0,fill:false,spanGaps:true});
   if(weightChart) weightChart.destroy();
   weightChart=new Chart(cv,{type:'line',data:{labels,datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},
@@ -450,11 +475,9 @@ function renderWeight(){
       scales:{y:{beginAtZero:false,grid:{color:'#ececef',borderDash:[4,4]},ticks:{color:'#b5b5ba',font:{size:12},callback:v=>v+'kg'}},
         x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit:6,autoSkip:true}}}}});
 }
-
 let toastT;
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1600); }
-
 async function init(){
   buildSel(); buildTrig(); updatePreview();
   $('datepick').max=ymd(new Date());
@@ -463,3 +486,5 @@ async function init(){
 }
 if(window.Chart){ init(); } else { window.addEventListener('load', init); }
 </script>
+</body>
+</html>
