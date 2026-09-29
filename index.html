@@ -2,11 +2,11 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>減酒記録</title>
+<title>からだ記録</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="減酒記録">
+<meta name="apple-mobile-web-app-title" content="からだ記録">
 <meta name="theme-color" content="#f2f2f7">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
@@ -20,6 +20,8 @@
     --green:#c47a45; --green-tint:#fbe3d0;
     --accent:#d76a86; --accent-press:#c85c78;
     --drink:#d76a86; --weight:#4f9fd0; --weight-press:#428fc0; --weight-tint:#dcecf9;
+    --gym:#2e9f7a; --gym-press:#258a69; --gym-tint:#e4f4ed; --gym-ink:#1f3f7a;
+    --ng:#e0735f; --ng-tint:#fcebe7;
   }
   html,body{margin:0;background:var(--bg);}
   body{
@@ -111,17 +113,79 @@
   #screen-weight .winput-row{background:var(--weight-tint);}
   #v-drink.on{color:var(--drink);}
   #v-weight.on{color:var(--weight);}
+  #v-gym.on{color:var(--gym);}
     .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
     background:#1c1c1e;color:#fff;padding:12px 22px;border-radius:14px;font-size:15px;font-weight:600;
-    opacity:0;transition:.25s;pointer-events:none;}
+    opacity:0;transition:.25s;pointer-events:none;z-index:10;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===== 筋トレ ===== */
+  #screen-gym .dates button.on{background:var(--gym);}
+  .parts{display:flex;gap:6px;margin-bottom:12px;}
+  .parts button{flex:1;border:none;background:var(--chip);color:#3a3a3c;font-size:14px;font-weight:700;
+    padding:10px 0;border-radius:12px;cursor:pointer;font-family:inherit;}
+  .parts button.on{background:var(--gym);color:#fff;}
+  .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .mbtn{border:none;background:var(--field);border-radius:14px;padding:11px 12px;text-align:left;
+    font-family:inherit;cursor:pointer;min-height:58px;}
+  .mbtn b{display:block;font-size:14.5px;color:var(--ink);font-weight:700;line-height:1.3;}
+  .mbtn span{font-size:12px;color:var(--sub);font-weight:600;}
+  .mbtn.added{background:var(--gym-tint);box-shadow:inset 0 0 0 1.5px var(--gym);}
+  .mbtn.added b::after{content:' ✓';color:var(--gym);}
+  .gempty{border:1.5px dashed #d6d1e4;border-radius:18px;padding:18px;text-align:center;
+    color:var(--sub);font-size:14px;font-weight:600;margin-bottom:14px;}
+  .ex{background:var(--card);border-radius:22px;padding:18px 18px 16px;margin-bottom:14px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.03);}
+  .exh{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .exn{font-size:19px;font-weight:800;color:var(--gym-ink);}
+  .exrm{border:none;background:var(--chip);color:var(--sub);width:30px;height:30px;border-radius:50%;
+    font-size:15px;font-weight:700;cursor:pointer;flex-shrink:0;}
+  .exlast{font-size:13px;color:var(--sub);margin:4px 0 12px;font-weight:600;}
+  .vals{display:flex;gap:10px;}
+  .vbox{flex:1;background:#f3f3f5;border-radius:14px;padding:8px;display:flex;align-items:center;justify-content:space-between;}
+  .mini{width:32px;height:32px;border:none;border-radius:10px;background:#fff;color:var(--gym);font-size:19px;
+    font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:pointer;line-height:0;flex-shrink:0;}
+  .vnum{text-align:center;cursor:pointer;flex:1;}
+  .vnum small{display:block;font-size:11px;color:var(--sub);font-weight:700;}
+  .vnum b{font-size:26px;font-weight:800;color:#222;}
+  .vnum i{font-style:normal;font-size:13px;font-weight:700;margin-left:2px;}
+  .setrow{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .setrow .sl{width:62px;font-size:14px;font-weight:700;color:var(--sub);flex-shrink:0;}
+  .sb{flex:1;height:44px;border-radius:22px;background:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .sb.ok{border:1.5px solid var(--gym);color:var(--gym);}
+  .sb.ok.on{background:var(--gym);color:#fff;}
+  .sb.ng{border:1.5px solid var(--ng);color:var(--ng);}
+  .sb.ng.on{background:var(--ng);color:#fff;}
+  .btn.gymdone{background:var(--gym);margin-top:0;}
+  .btn.gymdone:active{background:var(--gym-press);}
+  .gsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+  .stat{background:var(--gym-tint);border-radius:14px;padding:10px 4px;text-align:center;}
+  .stat b{display:block;font-size:24px;font-weight:800;color:var(--gym);}
+  .stat span{font-size:12px;color:var(--sub);font-weight:700;}
+  .calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .calnav span{font-size:16px;font-weight:700;}
+  .calnav button{border:none;background:var(--chip);color:#3a3a3c;font-size:13px;font-weight:700;
+    padding:7px 14px;border-radius:10px;cursor:pointer;}
+  .gcal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px 0;text-align:center;}
+  .cw{font-size:12px;color:var(--sub);font-weight:700;padding:4px 0;}
+  .cd{width:36px;height:36px;margin:0 auto;border:none;background:none;border-radius:50%;font-size:14px;
+    font-weight:600;color:var(--ink);font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .cd:disabled{color:#d3cfdc;cursor:default;}
+  .cd.today{box-shadow:inset 0 0 0 2px var(--gym);}
+  .cd.sel{background:var(--gym-tint);}
+  .cd.has{background:var(--gym);color:#fff;font-weight:800;}
+  .hrow{padding:12px 2px;border-bottom:1px solid #f0f0f2;cursor:pointer;}
+  .hrow:last-child{border-bottom:none;}
+  .hd{font-size:14px;font-weight:700;color:#3c4043;}
+  .hi{font-size:13px;color:#5f6368;margin-top:3px;line-height:1.6;}
 </style>
 </head>
 <body>
-<h1>減酒記録</h1>
+<h1>からだ記録</h1>
 <div class="viewtoggle">
   <button id="v-drink" class="on" onclick="setView('drink')">お酒</button>
   <button id="v-weight" onclick="setView('weight')">体重</button>
+  <button id="v-gym" onclick="setView('gym')">筋トレ</button>
 </div>
 <div id="screen-drink">
 <div class="card">
@@ -197,6 +261,33 @@
   </div>
   <div class="chartwrap"><canvas id="wchart"></canvas></div>
   <div class="wk" id="wgoalrow">目標 <input id="wGoal" class="goalinput" type="number" inputmode="decimal" step="0.1" placeholder="—" onchange="setGoal(this.value)"> kg</div>
+</div>
+</div>
+<div id="screen-gym" style="display:none">
+<div class="card">
+  <h2>筋トレを記録</h2>
+  <div class="dates">
+    <button id="gd-today" onclick="pickGToday()">今日</button>
+    <button id="gd-yest" onclick="pickGYest()">昨日</button>
+  </div>
+  <div class="datelabel" id="gdatelabel"></div>
+  <label class="lbl" style="margin-top:16px">部位を選んで、やったマシンをタップ</label>
+  <div class="parts" id="gparts"></div>
+  <div class="mgrid" id="gmachines"></div>
+</div>
+<div id="glist"></div>
+<button class="btn gymdone" onclick="finishGym()">トレーニング完了</button>
+<div class="card" style="margin-top:18px">
+  <h2>ジム記録</h2>
+  <div class="gsum" id="gsum"></div>
+  <div class="calnav">
+    <button onclick="gMonthMove(-1)">◀</button>
+    <span id="gcal-title"></span>
+    <button onclick="gMonthMove(1)">▶</button>
+  </div>
+  <div class="gcal" id="gcal"></div>
+  <label class="lbl" style="margin-top:20px">最近のトレーニング</label>
+  <div id="ghist"></div>
 </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -390,13 +481,19 @@ function renderMemos(){
 }
 function setMetric(m){ metric=m; $('tg-g').className=m==='g'?'on':''; $('tg-c').className=m==='count'?'on':''; render(); }
 const GKEY='sake_goal_v1';
+const VKEY='view_v1';
 function setView(v){
   view=v;
+  try{ localStorage.setItem(VKEY, v); }catch(e){}
   $('v-drink').className=v==='drink'?'on':'';
   $('v-weight').className=v==='weight'?'on':'';
+  $('v-gym').className=v==='gym'?'on':'';
   $('screen-drink').style.display=v==='drink'?'':'none';
   $('screen-weight').style.display=v==='weight'?'':'none';
-  if(v==='weight'){ if(!wDate) wDate=ymd(new Date()); setWDate(wDate); renderWeight(); } else { render(); }
+  $('screen-gym').style.display=v==='gym'?'':'none';
+  if(v==='weight'){ if(!wDate) wDate=ymd(new Date()); setWDate(wDate); renderWeight(); }
+  else if(v==='gym'){ try{ if(!gDate) setGDate(ymd(new Date())); else renderGymAll(); }catch(e){ console.error(e); } }
+  else { render(); }
 }
 function prefillWeight(){
   const e=entries[wDate||ymd(new Date())];
@@ -475,6 +572,240 @@ function renderWeight(){
       scales:{y:{beginAtZero:false,grid:{color:'#ececef',borderDash:[4,4]},ticks:{color:'#b5b5ba',font:{size:12},callback:v=>v+'kg'}},
         x:{grid:{display:false},ticks:{color:'#b5b5ba',font:{size:12},maxTicksLimit:6,autoSkip:true}}}}});
 }
+
+// =====================================================================
+// ===== 筋トレ（ここから下は独立。既存のお酒・体重には触れない） =====
+// =====================================================================
+// ▼ メニューはここだけ編集すればOK
+//   type: 'kg' = 重さ＋回数＋セット / 'rep' = 回数＋セット / 'min' = 分数のみ
+//   kg / reps / min は「初めてやる時」の初期値。2回目以降は前回の値が自動で入る
+//   step は ± ボタン1回で変わる重さ（省略時 5kg）
+const GYM_MENU = {
+  '上半身':[
+    {name:'シーテッドロー',       sub:'背中',       type:'kg', kg:35, reps:10},
+    {name:'ラットアイソレータ',   sub:'背中',       type:'kg', kg:30, reps:10},
+    {name:'チェストプレス',       sub:'胸',         type:'kg', kg:25, reps:10},
+    {name:'ショルダープレス',     sub:'肩',         type:'kg', kg:25, reps:10},
+    {name:'ダンベル',             sub:'1〜10kg',    type:'kg', kg:5,  reps:10, step:1}
+  ],
+  '下半身':[
+    {name:'レッグプレス',         sub:'太もも・お尻', type:'kg', kg:60, reps:10},
+    {name:'カーフレイズ',         sub:'ふくらはぎ', type:'kg', kg:40, reps:15},
+    {name:'レッグエクステンション', sub:'太もも前', type:'kg', kg:40, reps:10},
+    {name:'レッグカール',         sub:'太もも裏',   type:'kg', kg:25, reps:10},
+    {name:'アダクション',         sub:'内もも',     type:'kg', kg:30, reps:10},
+    {name:'アブダクション',       sub:'外もも',     type:'kg', kg:30, reps:10}
+  ],
+  '体幹':[
+    {name:'ロータリートーソ',     sub:'脇腹',       type:'kg', kg:20, reps:10},
+    {name:'アブアイソレータ',     sub:'腹',         type:'kg', kg:20, reps:10},
+    {name:'アブドミナル＆バック', sub:'腹・背中',   type:'kg', kg:20, reps:10},
+    {name:'バックエクステンション', sub:'背中・自重', type:'rep', reps:15},
+    {name:'腹筋ベンチ',           sub:'自重',       type:'rep', reps:15},
+    {name:'ストレッチ',           sub:'マット',     type:'min', min:10}
+  ],
+  '有酸素':[
+    {name:'ランニングマシン',     sub:'30分交代制', type:'min', min:20},
+    {name:'アークトレーナー',     sub:'30分交代制', type:'min', min:20},
+    {name:'バイク',               sub:'',           type:'min', min:20}
+  ]
+};
+const GYM_SETS = 3;
+// ▼ true = スプシの gym シートにも保存（false にすると端末内だけ）
+const GYM_SYNC = true;
+const GCACHE = 'gym_cache_v1';
+let gym = {};            // { 'YYYY-MM-DD': { items:[ {name,part,type,kg,reps,min,sets:[0|1|2]} ] } }
+let gDate = null, gPart = '上半身', gMonth = null;
+
+function loadGym(){ try{ const raw=localStorage.getItem(GCACHE); if(raw) gym=JSON.parse(raw)||{}; }catch(e){ gym={}; } }
+function saveGymCache(){ try{ localStorage.setItem(GCACHE, JSON.stringify(gym)); }catch(e){} }
+function hasGym(k){ const d=gym[k]; return !!(d && d.items && d.items.length); }
+function gymKeys(){ return Object.keys(gym).filter(hasGym).sort(); }
+function menuDef(name){
+  for(const p in GYM_MENU){ const m=GYM_MENU[p].find(x=>x.name===name); if(m) return m; }
+  return null;
+}
+function gDay(){ if(!gym[gDate]) gym[gDate]={items:[]}; return gym[gDate]; }
+function gItems(){ return (gym[gDate] && gym[gDate].items) || []; }
+
+// ---- 日付 ----
+function setGDate(key){
+  gDate=key;
+  const tk=ymd(new Date()), yd=new Date(); yd.setDate(yd.getDate()-1); const yk=ymd(yd);
+  $('gd-today').className=key===tk?'on':'';
+  $('gd-yest').className=key===yk?'on':'';
+  const d=keyToDate(key);
+  $('gdatelabel').textContent=(d.getMonth()+1)+'/'+d.getDate()+'('+WD[d.getDay()]+') のトレーニング';
+  if(!gMonth) gMonth=new Date(d.getFullYear(), d.getMonth(), 1);
+  renderGymAll();
+}
+function pickGToday(){ setGDate(ymd(new Date())); }
+function pickGYest(){ const d=new Date(); d.setDate(d.getDate()-1); setGDate(ymd(d)); }
+function pickGDay(key){ setGDate(key); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ---- 表示 ----
+function valText(it){
+  let s='';
+  if(it.type==='kg') s=it.kg+'kg×'+it.reps+'回';
+  else if(it.type==='rep') s=it.reps+'回';
+  else s=it.min+'分';
+  if(it.sets && it.sets.some(x=>x)) s+='（'+it.sets.filter(x=>x===1).length+'/'+it.sets.length+'セット）';
+  return s;
+}
+function lastFor(name){
+  const ks=gymKeys().filter(k=>k<gDate).reverse();
+  for(const k of ks){ const it=gym[k].items.find(x=>x.name===name); if(it) return {date:k, it}; }
+  return null;
+}
+function renderGymPicker(){
+  $('gparts').innerHTML=Object.keys(GYM_MENU).map(p=>
+    `<button class="${p===gPart?'on':''}" onclick="setGPart('${p}')">${p}</button>`).join('');
+  const added=new Set(gItems().map(x=>x.name));
+  $('gmachines').innerHTML=GYM_MENU[gPart].map((m,i)=>
+    `<button class="mbtn ${added.has(m.name)?'added':''}" onclick="addMachine('${gPart}',${i})"><b>${m.name}</b><span>${m.sub||'&nbsp;'}</span></button>`).join('');
+}
+function setGPart(p){ gPart=p; renderGymPicker(); }
+function vbox(i, f, label, unit, val){
+  return `<div class="vbox">
+    <button class="mini" onclick="gAdj(${i},'${f}',-1)">−</button>
+    <div class="vnum" onclick="gEdit(${i},'${f}')"><small>${label}</small><b>${val}</b><i>${unit}</i></div>
+    <button class="mini" onclick="gAdj(${i},'${f}',1)">＋</button></div>`;
+}
+function renderGymList(){
+  const list=gItems();
+  if(!list.length){ $('glist').innerHTML='<div class="gempty">↑ 部位を選んで、やったマシンをタップ</div>'; return; }
+  $('glist').innerHTML=list.map((it,i)=>{
+    const last=lastFor(it.name);
+    let hint='はじめての種目';
+    if(last){
+      const d=keyToDate(last.date);
+      hint='前回 '+(d.getMonth()+1)+'/'+d.getDate()+'：'+valText(last.it);
+      if(last.it.type==='kg' && last.it.sets && last.it.sets.length && last.it.sets.every(x=>x===1)) hint+=' → 全部できた！重さUPもあり💪';
+    }
+    let vals='';
+    if(it.type==='kg') vals=vbox(i,'kg','重さ','kg',it.kg)+vbox(i,'reps','回数','回',it.reps);
+    else if(it.type==='rep') vals=vbox(i,'reps','回数','回',it.reps);
+    else vals=vbox(i,'min','時間','分',it.min);
+    let sets='';
+    if(it.sets) sets=it.sets.map((s,j)=>
+      `<div class="setrow"><div class="sl">${j+1}セット目</div>
+        <button class="sb ok ${s===1?'on':''}" onclick="gSet(${i},${j},1)">✓ できた！</button>
+        <button class="sb ng ${s===2?'on':''}" onclick="gSet(${i},${j},2)">× できない</button></div>`).join('');
+    return `<div class="ex">
+      <div class="exh"><div class="exn">${it.name}</div><button class="exrm" onclick="gRemove(${i})">×</button></div>
+      <div class="exlast">${hint}</div>
+      <div class="vals">${vals}</div>${sets}</div>`;
+  }).join('');
+}
+function statBox(label,n){ return `<div class="stat"><b>${n}</b><span>${label}</span></div>`; }
+function renderGymHistory(){
+  const keys=gymKeys(); const t=new Date(); const tk=ymd(t); const mk=tk.slice(0,7);
+  const mon=new Date(t); mon.setDate(t.getDate()-((t.getDay()+6)%7)); const w0=ymd(mon);
+  $('gsum').innerHTML=statBox('今月',keys.filter(k=>k.slice(0,7)===mk).length+'回')
+    +statBox('今週',keys.filter(k=>k>=w0 && k<=tk).length+'回')
+    +statBox('通算',keys.length+'回');
+  renderGymCal();
+  const rec=keys.slice().reverse().slice(0,8);
+  if(!rec.length){ $('ghist').innerHTML='<div class="memo-empty">まだ記録はありません。</div>'; return; }
+  $('ghist').innerHTML=rec.map(k=>{
+    const d=keyToDate(k);
+    const lines=gym[k].items.map(it=>it.name+' '+valText(it)).join('<br>');
+    return `<div class="hrow" onclick="pickGDay('${k}')"><div class="hd">${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})</div><div class="hi">${lines}</div></div>`;
+  }).join('');
+}
+function renderGymCal(){
+  if(!gMonth){ const t=new Date(); gMonth=new Date(t.getFullYear(), t.getMonth(), 1); }
+  const y=gMonth.getFullYear(), m=gMonth.getMonth(); const tk=ymd(new Date());
+  $('gcal-title').textContent=y+'年'+(m+1)+'月';
+  const offset=(new Date(y,m,1).getDay()+6)%7; const days=new Date(y,m+1,0).getDate();
+  let html=['月','火','水','木','金','土','日'].map(w=>`<div class="cw">${w}</div>`).join('');
+  for(let i=0;i<offset;i++) html+='<div></div>';
+  for(let d=1; d<=days; d++){
+    const k=ymd(new Date(y,m,d));
+    const cls=['cd']; if(hasGym(k)) cls.push('has'); if(k===tk) cls.push('today'); if(k===gDate) cls.push('sel');
+    html+=`<button class="${cls.join(' ')}" ${k>tk?'disabled':''} onclick="pickGDay('${k}')">${d}</button>`;
+  }
+  $('gcal').innerHTML=html;
+}
+function gMonthMove(n){ gMonth=new Date(gMonth.getFullYear(), gMonth.getMonth()+n, 1); renderGymCal(); }
+function renderGymAll(){ renderGymPicker(); renderGymList(); renderGymHistory(); }
+
+// ---- 操作 ----
+function gChanged(){
+  const d=gym[gDate]; if(d && !(d.items && d.items.length)) delete gym[gDate];
+  saveGymCache(); queueGymPush(gDate); renderGymAll();
+}
+function addMachine(part, idx){
+  const m=GYM_MENU[part][idx]; const day=gDay();
+  if(day.items.some(x=>x.name===m.name)){ toast('もう追加されています'); return; }
+  const last=lastFor(m.name); const L=last?last.it:{};
+  const it={name:m.name, part, type:m.type};
+  if(m.type==='kg'){ it.kg=L.kg!=null?L.kg:m.kg; it.reps=L.reps!=null?L.reps:m.reps; }
+  if(m.type==='rep'){ it.reps=L.reps!=null?L.reps:m.reps; }
+  if(m.type==='min'){ it.min=L.min!=null?L.min:m.min; }
+  if(m.type!=='min') it.sets=new Array(GYM_SETS).fill(0);
+  day.items.push(it); gChanged();
+  toast(last?'前回の重さ・回数を入れました':'追加しました');
+}
+function gAdj(i, f, dir){
+  const it=gItems()[i]; if(!it) return;
+  const def=menuDef(it.name)||{};
+  const step = f==='kg' ? (def.step||5) : f==='min' ? 5 : 1;
+  it[f]=Math.max(0, Math.round((it[f]+dir*step)*10)/10);
+  gChanged();
+}
+function gEdit(i, f){
+  const it=gItems()[i]; if(!it) return;
+  const label={kg:'重さ（kg）',reps:'回数',min:'時間（分）'}[f];
+  const v=prompt(label, it[f]); if(v===null) return;
+  const n=parseFloat(v); if(isNaN(n)||n<0){ toast('数字で入力してね'); return; }
+  it[f]= f==='kg' ? Math.round(n*10)/10 : Math.round(n);
+  gChanged();
+}
+function gSet(i, j, v){
+  const it=gItems()[i]; if(!it||!it.sets) return;
+  it.sets[j] = it.sets[j]===v ? 0 : v;
+  gChanged();
+  if(it.sets.every(x=>x===1)) toast('✓ '+it.name+' コンプリート！');
+}
+function gRemove(i){
+  const it=gItems()[i]; if(!it) return;
+  if(!confirm(it.name+' を外しますか？')) return;
+  gDay().items.splice(i,1); gChanged();
+}
+function finishGym(){
+  if(!hasGym(gDate)){ toast('種目を追加してね'); return; }
+  flushGymPush();
+  const mk=gDate.slice(0,7); const n=gymKeys().filter(k=>k.slice(0,7)===mk).length;
+  toast('💪 おつかれさま！今月'+n+'回目');
+}
+
+// ---- 同期（GYM_SYNC=true の時だけ） ----
+let gPushT=null; const gPushDates=new Set();
+function queueGymPush(date){ gPushDates.add(date); clearTimeout(gPushT); gPushT=setTimeout(flushGymPush,1500); }
+function flushGymPush(){ clearTimeout(gPushT); const ds=[...gPushDates]; gPushDates.clear(); ds.forEach(pushGym); }
+async function pushGym(date){
+  if(!(API_SET && GYM_SYNC)) return;
+  const d=gym[date];
+  try{
+    await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'gymSave', date, data: hasGym(date)?JSON.stringify(d):''})});
+  }catch(e){ toast('筋トレの同期に失敗（通信環境を確認）'); }
+}
+async function syncGym(){
+  if(!(API_SET && GYM_SYNC)) return;
+  try{
+    const r=await fetch(API+'?app=gym'); const data=await r.json();
+    if(!data || typeof data!=='object' || Array.isArray(data)) return;
+    const remote={};
+    Object.keys(data).forEach(k=>{ const v=data[k];
+      if(v && Array.isArray(v.items) && v.items.length && v.items.every(x=>x && x.name)) remote[k]=v; });
+    Object.keys(gym).forEach(k=>{ if(hasGym(k) && !(k in remote)){ remote[k]=gym[k]; pushGym(k); } });
+    gym=remote; saveGymCache();
+    if(view==='gym') renderGymAll();
+  }catch(e){ /* オフライン時は端末内のまま */ }
+}
+
 let toastT;
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1600); }
@@ -482,6 +813,9 @@ async function init(){
   buildSel(); buildTrig(); updatePreview();
   $('datepick').max=ymd(new Date());
   load(); loadGoal(); pickToday(); render(); renderWeight();  // まずキャッシュで即表示
+  try{ loadGym(); let v0='drink'; try{ v0=localStorage.getItem(VKEY)||'drink'; }catch(e){}
+    if(v0!=='drink') setView(v0); }catch(e){ console.error(e); }
+  syncGym();
   await syncRemote();                                         // シートから最新を取得して上書き
 }
 if(window.Chart){ init(); } else { window.addEventListener('load', init); }
