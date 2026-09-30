@@ -732,7 +732,7 @@ function renderGymAll(){ renderGymPicker(); renderGymList(); renderGymHistory();
 
 // ---- 操作 ----
 function gChanged(){
-  const d=gym[gDate]; if(d && !(d.items && d.items.length)) delete gym[gDate];
+  gDay().updatedAt=Date.now();   // 種目ゼロになっても「消した」という記録として残す（同期で復活しないように）
   saveGymCache(); queueGymPush(gDate); renderGymAll();
 }
 function addMachine(part, idx){
@@ -773,26 +773,40 @@ function gRemove(i){
   if(!confirm(it.name+' を外しますか？')) return;
   gDay().items.splice(i,1); gChanged();
 }
-function finishGym(){
+async function finishGym(){
   if(!hasGym(gDate)){ toast('種目を追加してね'); return; }
-  flushGymPush();
   const mk=gDate.slice(0,7); const n=gymKeys().filter(k=>k.slice(0,7)===mk).length;
-  toast('💪 おつかれさま！今月'+n+'回目');
+  const msg='💪 おつかれさま！今月'+n+'回目';
+  // 待ち中の他の日も送りつつ、この日は必ず送り直す
+  clearTimeout(gPushT); gPushDates.delete(gDate); const rest=[...gPushDates]; gPushDates.clear(); rest.forEach(pushGym);
+  if(!(API_SET && GYM_SYNC)){ toast(msg); return; }
+  toast('スプシに保存中…');
+  const ok=await pushGym(gDate);
+  toast(ok ? msg+'（保存OK）' : '保存できませんでした。次に開いた時に自動で送り直します');
 }
 
 // ---- 同期（GYM_SYNC=true の時だけ） ----
 let gPushT=null; const gPushDates=new Set();
 function queueGymPush(date){ gPushDates.add(date); clearTimeout(gPushT); gPushT=setTimeout(flushGymPush,1500); }
 function flushGymPush(){ clearTimeout(gPushT); const ds=[...gPushDates]; gPushDates.clear(); ds.forEach(pushGym); }
-async function pushGym(date){
-  if(!(API_SET && GYM_SYNC)) return;
-  const d=gym[date];
-  try{
-    await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({action:'gymSave', date, data: hasGym(date)?JSON.stringify(d):''})});
-  }catch(e){ toast('筋トレの同期に失敗（通信環境を確認）'); }
+let gChain=Promise.resolve();
+// 1件ずつ順番に送る（同時に送ると取りこぼしやすいため）。失敗したら少し待って最大3回まで再送
+function pushGym(date){ const p=gChain.then(()=>pushGymOnce(date)); gChain=p.catch(()=>{}); return p; }
+async function pushGymOnce(date){
+  if(!(API_SET && GYM_SYNC)) return true;
+  for(let i=0;i<3;i++){
+    const d=gym[date];   // 送る直前の最新内容を使う
+    try{
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({action:'gymSave', date, data: hasGym(date)?JSON.stringify(d):''})});
+      let ok=true; try{ const j=await r.json(); if(j && j.ok===false) ok=false; }catch(e){}
+      if(ok) return true;
+    }catch(e){}
+    await new Promise(res=>setTimeout(res, 1500*(i+1)));
+  }
+  return false;
 }
-async function syncGym(){
+async function syncGym(){ // 起動時：スプシと突き合わせ、新しい方を残す（端末の方が新しければスプシへ送り直す）
   if(!(API_SET && GYM_SYNC)) return;
   try{
     const r=await fetch(API+'?app=gym'); const data=await r.json();
@@ -800,8 +814,17 @@ async function syncGym(){
     const remote={};
     Object.keys(data).forEach(k=>{ const v=data[k];
       if(v && Array.isArray(v.items) && v.items.length && v.items.every(x=>x && x.name)) remote[k]=v; });
-    Object.keys(gym).forEach(k=>{ if(hasGym(k) && !(k in remote)){ remote[k]=gym[k]; pushGym(k); } });
-    gym=remote; saveGymCache();
+    const merged={}, toPush=[];
+    new Set([...Object.keys(gym), ...Object.keys(remote)]).forEach(k=>{
+      const L=gym[k], R=remote[k]; const lt=(L&&L.updatedAt)||0, rt=(R&&R.updatedAt)||0;
+      if(L && (!R || lt>=rt)){
+        merged[k]=L;
+        const same = R && JSON.stringify(L.items)===JSON.stringify(R.items);
+        if((!R && hasGym(k)) || (R && !same)) toPush.push(k);
+      } else merged[k]=R;
+    });
+    gym=merged; saveGymCache();
+    toPush.forEach(pushGym);
     if(view==='gym') renderGymAll();
   }catch(e){ /* オフライン時は端末内のまま */ }
 }
